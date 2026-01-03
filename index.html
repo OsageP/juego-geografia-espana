@@ -93,9 +93,9 @@
     <header>
       <div class="title">
         <h1>Juego de Geografía: Comunidades y Provincias de España</h1>
-        
       </div>
       <div>
+        <button id="btn-how" class="ghost">Cómo jugar</button>
         <button id="btn-reset" class="ghost">Reiniciar</button>
       </div>
     </header>
@@ -132,7 +132,7 @@
     </div>
 <footer>
       <div>
-     <p>&copy; <?php echo date("Y"); ?> Juego de Geografía: Comunidades y Provincias de España by Osagep<a href="https://dinoswords.gg/" target="_self" style="text-decoration: none; color: inherit;">.</a> V.1.0.1.</p>
+     <p>&copy; <span id="year"></span> Juego de Geografía: Comunidades y Provincias de España by Osagep<a href="https://dinoswords.gg/" target="_self" style="text-decoration: none; color: inherit;">.</a> V.1.0.1.</p>
       </div>
     </footer>
   </div>
@@ -223,6 +223,9 @@
     result: document.getElementById('result'),
     summary: document.getElementById('summary'),
   };
+
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Utils
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
