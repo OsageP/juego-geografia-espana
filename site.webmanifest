@@ -1,0 +1,30 @@
+{
+  "name": "Juego de Mapas de España",
+  "short_name": "Mapas España",
+  "lang": "es-ES",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "categories": [
+    "education",
+    "game",
+    "geography"
+  ],
+  "description": "Juego educativo para repasar las comunidades autónomas y provincias de España.",
+  "icons": [
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Single-color silhouette for Safari pinned tab. The color is set via the HTML link color attribute. -->
+  <g fill="#000000">
+    <!-- Pin head (circle) -->
+    <circle cx="512" cy="420" r="200"/>
+    <!-- Pin tail (triangle) -->
+    <polygon points="512,880 344,520 680,520"/>
+    <!-- Inner hole (punch) — pinned-tab uses mask, but keeping silhouette solid is fine.
+         If you prefer a ring, uncomment the smaller circle and change fill-rule.
+    -->
+  </g>
+</svg>

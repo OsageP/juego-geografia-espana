@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juego de Geografía: Comunidades y Provincias de España</title>
+  <meta name="description" content="Juego educativo para repasar todas las comunidades autónomas y provincias de España. Dos niveles, preguntas adaptativas, marcaje de aciertos y reintentos.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="color-scheme" content="light dark">
+  <meta name="application-name" content="Mapas de España">
+  <meta name="author" content="OsageP - 2025">
+
+  <!-- FAVICONES / ICONOS -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#0ea5e9">
+  <meta name="msapplication-TileColor" content="#0ea5e9">
+
+  <!-- PWA / Android -->
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- SEO / SOCIAL -->
+  <link rel="canonical" href="https://tusitio.com/"><!-- CAMBIA por tu URL -->
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Juego de Geografía: Comunidades y Provincias de España">
+  <meta property="og:description" content="Pon a prueba tus conocimientos: identifica todas las comunidades y provincias en el mapa de España.">
+  <meta property="og:url" content="https://tusitio.com/"><!-- CAMBIA -->
+  <meta property="og:image" content="https://tusitio.com/og-image.jpg"><!-- 1200×630 -->
+  <meta property="og:image:alt" content="Mapa de España con las comunidades autónomas resaltadas.">
+  <meta property="og:site_name" content="Mapas de España">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Juego de Geografía: Comunidades y Provincias de España">
+  <meta name="twitter:description" content="Repasa todas las comunidades y provincias de España con este juego interactivo.">
+  <meta name="twitter:image" content="https://tusitio.com/og-image.jpg"><!-- CAMBIA -->
+
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --panel:#111827; /* gray-900 */
+      --ink:#e5e7eb;  /* gray-200 */
+      --muted:#9ca3af; /* gray-400 */
+      --brand:#38bdf8; /* sky-400 */
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#0b1220,#0f172a 30%);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px;}
+    header{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .title h1{font-size:clamp(18px,3.2vw,28px);margin:0;font-weight:800;letter-spacing:.2px}
+    .badge{font-size:12px;background:#1f2937;color:#93c5fd;border:1px solid #0ea5e9;padding:4px 8px;border-radius:999px}
+
+    .panels{display:grid;grid-template-columns:1fr;gap:16px}
+    .card{background:var(--panel);border:1px solid #1f2937;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .left{padding:14px 14px 10px}
+    .right{min-height:520px;position:relative;overflow:hidden}
+    .mapbox{position:absolute;inset:0;display:grid;place-items:center;padding:8px}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+    button, .btn{cursor:pointer;border:1px solid #1f2937;background:#0b1220;color:#e5e7eb;border-radius:10px;padding:10px 12px;font-weight:600}
+    button:hover,.btn:hover{background:#111827}
+    button.primary{background:linear-gradient(180deg,#0284c7,#0369a1);border-color:#0ea5e9}
+    button.primary:hover{filter:brightness(1.05)}
+    .ghost{background:#0b122000;color:#cbd5e1}
+    .toolbar .lvl{flex:1}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+    .stat{background:#0b1220;border:1px dashed #1f2937;border-radius:10px;padding:10px;text-align:center}
+    .stat h3{margin:0;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+    .stat p{margin:6px 0 0;font-size:20px;font-weight:800}
+
+    .question{font-size:18px;line-height:1.35;background:#0b1220;border:1px solid #1f2937;border-radius:10px;padding:12px;margin:10px 0}
+    .muted{color:#94a3b8}
+    .result{padding:12px;border:1px solid #1f2937;border-radius:10px;background:#0b1220;margin-top:10px}
+
+    /* SVG map */
+    svg{width:100%;height:100%;display:block}
+    .hoverable{cursor:pointer;transition:filter .2s ease}
+    .hoverable:hover{filter:brightness(1.1)}
+    .correct{fill:rgba(34,197,94,.75)!important;stroke:#16a34a!important}
+    .wrong{fill:rgba(239,68,68,.75)!important;stroke:#b91c1c!important}
+    .target{outline:5px dashed #fff602;outline-offset:1px}
+    .locked{fill:rgba(34,197,94,.45)!important;stroke:#16a34a!important;pointer-events:none;filter:saturate(0.9)}
+
+    /* Mapa a ancho completo */
+    .map-fullwidth{width:100vw;margin-left:calc(50% - 50vw);border-radius:0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Juego de Geografía: Comunidades y Provincias de España</h1>
+        
+      </div>
+      <div>
+        <button id="btn-reset" class="ghost">Reiniciar</button>
+      </div>
+    </header>
+
+    <div class="panels">
+      <aside class="card left">
+        <div class="toolbar">
+          <button class="lvl primary" data-level="1">Nivel 1 · Comunidades</button>
+          <button class="lvl" data-level="2">Nivel 2 · Provincias</button>
+        </div>
+        <div class="question" id="question">Elige un nivel para empezar.</div>
+        <div class="stats">
+          <div class="stat"><h3>Aciertos</h3><p id="hits">0</p></div>
+          <div class="stat"><h3>Fallos</h3><p id="miss">0</p></div>
+          <div class="stat"><h3>Preguntas</h3><p id="round">0</p></div>
+          <div class="stat"><h3>Restantes</h3><p id="left">-</p></div>
+        </div>
+        <div class="result" id="result" hidden>
+          <h3 style="margin:.2rem 0 .4rem">Resultado</h3>
+          <p id="summary" class="muted"></p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="again" class="primary">Volver a jugar</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="card right map-fullwidth">
+        <div class="mapbox" id="mapbox"><!-- SVG aquí --></div>
+        <div class="legend" style="position:absolute;left:10px;bottom:10px;display:flex;gap:8px;background:#0b1220aa;padding:8px 10px;border:1px solid #1f2937;border-radius:10px;backdrop-filter:blur(6px)">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#cbd5e1"><span style="width:14px;height:14px;border-radius:3px;border:1px solid #1f2937;background:rgba(34,197,94,.7);display:inline-block"></span> Acierto</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#cbd5e1"><span style="width:14px;height:14px;border-radius:3px;border:1px solid #1f2937;background:rgba(239,68,68,.7);display:inline-block"></span> Error</div>
+        </div>
+      </section>
+    </div>
+<footer>
+      <div>
+     <p>&copy; <?php echo date("Y"); ?> Juego de Geografía: Comunidades y Provincias de España by Osagep<a href="https://dinoswords.gg/" target="_self" style="text-decoration: none; color: inherit;">.</a> V.1.0.1.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+  // ===============================================
+  // Configuración
+  // ===============================================
+  const MAP_URLS = {
+    admin1: 'maps/comunidades.svg', // Comunidades (tu archivo local)
+    admin2: 'maps/provincias.svg'   // Provincias (tu archivo local)
+  };
+
+  const COMMUNITIES = [
+    'Andalucía','Aragón','Asturias','Cantabria','Castilla y León','Castilla-La Mancha','Cataluña','Extremadura','Galicia','Comunidad de Madrid','Región de Murcia','La Rioja','Navarra','País Vasco','Comunidad Valenciana','Islas Baleares','Islas Canarias','Ceuta','Melilla'
+  ];
+
+  const PROVINCES = [
+    'Álava','Albacete','Alicante','Almería','Ávila','Badajoz','Barcelona','Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ciudad Real','Córdoba','A Coruña','Cuenca','Gipuzkoa','Girona','Granada','Guadalajara','Huelva','Huesca','Islas Baleares','Jaén','La Rioja','Las Palmas','León','Lleida','Lugo','Madrid','Málaga','Murcia','Navarra','Ourense','Palencia','Pontevedra','Salamanca','Santa Cruz de Tenerife','Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Bizkaia','Zamora','Zaragoza','Ceuta','Melilla'
+  ];
+
+  // Alias y normalización para nombres que llegan del SVG
+  const NAME_ALIASES = {
+    'la coruna': 'A Coruña', 'a coruna': 'A Coruña',
+    'orense': 'Ourense', 'ourense': 'Ourense',
+    'vizcaya': 'Bizkaia', 'bizkaia': 'Bizkaia',
+    'guipuzcoa': 'Gipuzkoa', 'gipuzkoa': 'Gipuzkoa',
+    'lerida': 'Lleida', 'lleida': 'Lleida',
+    'gerona': 'Girona', 'girona': 'Girona',
+    'illes balears': 'Islas Baleares','baleares': 'Islas Baleares',
+    'pais vasco': 'País Vasco','euskadi': 'País Vasco',
+    'comunidad valenciana': 'Comunidad Valenciana','comunitat valenciana': 'Comunidad Valenciana',
+    'cataluna': 'Cataluña',
+    'rioja': 'La Rioja', 'la rioja': 'La Rioja',
+    'navarra, comunidad foral de': 'Navarra',
+    'comunidad foral de navarra': 'Navarra',
+    'navarra': 'Navarra',
+    'islas canarias': 'Islas Canarias', 'canarias': 'Islas Canarias',
+    'comunidad de madrid': 'Comunidad de Madrid',
+    'castilla la mancha': 'Castilla-La Mancha',
+    'castilla-la mancha': 'Castilla-La Mancha',
+    'castilla y leon': 'Castilla y León',
+    'aragon': 'Aragón',
+    'region de murcia': 'Región de Murcia',
+    'murcia': 'Región de Murcia'
+  };
+
+  const P2C = {
+    'Álava':'País Vasco','Bizkaia':'País Vasco','Gipuzkoa':'País Vasco',
+    'Navarra':'Navarra','La Rioja':'La Rioja',
+    'Cantabria':'Cantabria','Asturias':'Asturias','A Coruña':'Galicia','Lugo':'Galicia','Ourense':'Galicia','Pontevedra':'Galicia',
+    'León':'Castilla y León','Palencia':'Castilla y León','Burgos':'Castilla y León','Zamora':'Castilla y León','Valladolid':'Castilla y León','Salamanca':'Castilla y León','Soria':'Castilla y León','Segovia':'Castilla y León','Ávila':'Castilla y León',
+    'Madrid':'Comunidad de Madrid',
+    'Guadalajara':'Castilla-La Mancha','Toledo':'Castilla-La Mancha','Cuenca':'Castilla-La Mancha','Ciudad Real':'Castilla-La Mancha','Albacete':'Castilla-La Mancha',
+    'Cáceres':'Extremadura','Badajoz':'Extremadura',
+    'Huesca':'Aragón','Zaragoza':'Aragón','Teruel':'Aragón',
+    'Barcelona':'Cataluña','Girona':'Cataluña','Lleida':'Cataluña','Tarragona':'Cataluña',
+    'Castellón':'Comunidad Valenciana','Valencia':'Comunidad Valenciana','Alicante':'Comunidad Valenciana',
+    'Murcia':'Región de Murcia',
+    'Sevilla':'Andalucía','Huelva':'Andalucía','Cádiz':'Andalucía','Córdoba':'Andalucía','Jaén':'Andalucía','Granada':'Andalucía','Almería':'Andalucía','Málaga':'Andalucía',
+    'Islas Baleares':'Islas Baleares',
+    'Las Palmas':'Islas Canarias','Santa Cruz de Tenerife':'Islas Canarias',
+    'Ceuta':'Ceuta','Melilla':'Melilla'
+  };
+
+  // ===============================================
+  // Estado
+  // ===============================================
+  const state = {
+    level: 0, // 1 comunidades, 2 provincias
+    round: 0,
+    hits: 0,
+    miss: 0,
+    target: null, // {type:'community'|'province', name:'...'}
+    svgRoot: null,
+    remainingCommunities: [],
+    remainingProvinces: [],
+    wrongQueue: [], // {type,name,cooldown}
+  };
+
+  const els = {
+    hits: document.getElementById('hits'),
+    miss: document.getElementById('miss'),
+    round: document.getElementById('round'),
+    left: document.getElementById('left'),
+    question: document.getElementById('question'),
+    mapbox: document.getElementById('mapbox'),
+    result: document.getElementById('result'),
+    summary: document.getElementById('summary'),
+  };
+
+  // Utils
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const norm = (s)=> (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const canon = (s)=> NAME_ALIASES[norm(s)] || s;
+  const sample = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+  function updateHUD(){
+    els.hits.textContent = state.hits;
+    els.miss.textContent = state.miss;
+    els.round.textContent = `${state.round}`;
+    if(state.level===1) els.left.textContent = `${state.remainingCommunities.length}`;
+    else if(state.level===2) els.left.textContent = `${state.remainingProvinces.length}`;
+    else els.left.textContent = '-';
+  }
+  function setQuestion(html){ els.question.innerHTML = html; }
+  function resetStats(){ state.round=0; state.hits=0; state.miss=0; updateHUD(); }
+
+  // ===============================================
+  // Carga de mapas (SVG)
+  // ===============================================
+  async function loadMap(kind){
+    state.svgRoot = null;
+    els.mapbox.innerHTML = '<p class="muted">Cargando mapa…</p>';
+    try{
+      const url = MAP_URLS[kind];
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const svg = await res.text();
+      injectSVG(svg);
+    }catch(err){
+      console.warn('Fallo al cargar mapa local:', err);
+      els.mapbox.innerHTML = '<p style="padding:12px">No se pudo cargar el mapa <code>'+kind+'</code> desde <code>'+MAP_URLS[kind]+'</code>.<br>Comprueba que ejecutas el archivo desde un <strong>servidor local</strong> (http://) y que la carpeta <code>/maps</code> está junto al HTML.</p>';
+    }
+  }
+
+  function injectSVG(svgText){
+    els.mapbox.innerHTML = svgText;
+    const svg = els.mapbox.querySelector('svg');
+    if(!svg){ els.mapbox.innerHTML = '<p>Archivo SVG no válido.</p>'; return; }
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+    svg.style.maxWidth = '100%';
+    svg.style.height = '100%';
+    const items = getClickableRegions(svg);
+    items.forEach(el=>{
+      el.classList.add('hoverable');
+      const nm = getElementName(el);
+      if(nm) el.setAttribute('data-name', nm);
+    });
+    svg.addEventListener('click', onMapClick);
+    state.svgRoot = svg;
+  }
+
+  function getClickableRegions(svg){
+    // Permitimos path, polygon y g con nombre (algunos mapas guardan el nombre en <g>)
+    return Array.from(svg.querySelectorAll('path, polygon, g')).filter(el => getElementName(el));
+  }
+
+  function getElementName(el){
+    // Busca nombre en el propio elemento o en sus ancestros cercanos (p. ej. <g name="..."><path/></g>)
+    let node = el; let tries = 0; let name = null;
+    while(node && tries < 3 && !name){
+      name = node.getAttribute && (node.getAttribute('name') || node.getAttribute('title') || node.getAttribute('data-name'));
+      if(!name){ const t = node.querySelector && node.querySelector('title'); if(t) name = t.textContent; }
+      if(!name && node.id){ const id = node.id; if(/^(ES|es|prov|comm|path|id)/.test(id)) name = id; }
+      node = node.parentElement; tries++;
+    }
+    if(!name) return null;
+    return canon(name);
+  }
+
+  // ===============================================
+  // Juego
+  // ===============================================
+  async function startLevel(level){
+    state.level = level; resetStats(); els.result.hidden = true;
+    state.remainingCommunities = COMMUNITIES.slice();
+    state.remainingProvinces = PROVINCES.slice();
+    state.wrongQueue = [];
+
+    const kind = (level===1 ? 'admin1' : 'admin2');
+    await loadMap(kind);
+    nextQuestion();
+  }
+
+  function nextQuestion(){
+    if(!state.svgRoot) return;
+
+    const outOfCommunities = state.remainingCommunities.length===0 && !state.wrongQueue.some(x=>x.type==='community');
+    const outOfProvinces   = state.remainingProvinces.length===0   && !state.wrongQueue.some(x=>x.type==='province');
+    if( (state.level===1 && outOfCommunities) || (state.level===2 && outOfProvinces) ) return endGame();
+
+    clearMarks();
+
+    // Repreguntas, bajando cooldown
+    state.wrongQueue.forEach(it => it.cooldown = Math.max(0,(it.cooldown||0)-1));
+    let fromQueue = null;
+    const idx = state.wrongQueue.findIndex(it => it.cooldown===0 && isRelevant(it));
+    if(idx>-1) fromQueue = state.wrongQueue.splice(idx,1)[0];
+
+    state.round++; updateHUD();
+
+    let qType = (state.level===1 ? 'community' : 'province');
+    let name;
+    if(fromQueue){ name = fromQueue.name; }
+    else if(qType==='community'){ name = sample(state.remainingCommunities); }
+    else { name = sample(state.remainingProvinces); }
+
+    state.target = { type:qType, name };
+    const label = (qType==='community' ? 'la <strong>comunidad autónoma</strong>' : 'la <strong>provincia</strong>');
+    setQuestion(`¿Dónde está <strong>${name}</strong>? (Haz clic en ${label} correcta).`);
+  }
+
+  function isRelevant(it){
+    return it.type==='community'
+      ? state.remainingCommunities.some(c=>norm(c)===norm(it.name))
+      : state.remainingProvinces.some(p=>norm(p)===norm(it.name));
+  }
+
+  function clearMarks(){
+    if(!state.svgRoot) return;
+    state.svgRoot.querySelectorAll('.wrong,.target').forEach(n=>n.classList.remove('wrong','target'));
+  }
+
+  async function onMapClick(e){
+    const el = e.target.closest('path,polygon,g');
+    if(!el || !state.target) return;
+    const clickedName = canon(getElementName(el) || '').toString();
+    if(!clickedName) return;
+
+    const { type, name: wanted } = state.target;
+
+    let isCorrect = false;
+    if(type==='province'){
+      isCorrect = norm(clickedName)===norm(wanted);
+    }else{
+      // 1) Si el elemento ya es una comunidad, compara directo
+      if(COMMUNITIES.some(c=> norm(c)===norm(clickedName))){
+        isCorrect = norm(clickedName)===norm(wanted);
+      }
+      // 2) Si no, puede que sea una provincia: valida por su comunidad
+      if(!isCorrect){
+        const provCanon = canon(clickedName);
+        const comm = P2C[provCanon];
+        isCorrect = comm && norm(comm)===norm(wanted);
+      }
+      // 3) Aún así, intenta alias/variantes tipo "aragon", "castilla la mancha"
+      if(!isCorrect){
+        const aliasHit = COMMUNITIES.find(c=> norm(c)===norm(clickedName));
+        if(aliasHit) isCorrect = norm(aliasHit)===norm(wanted);
+      }
+    }
+
+    if(isCorrect){
+      if(type==='community') markCommunitySolved(wanted);
+      else markProvinceSolved(wanted);
+      state.hits++; updateHUD();
+      await sleep(300);
+      nextQuestion();
+    }else{
+      markWrong(el);
+      state.miss++; updateHUD();
+      enqueueWrong({ type, name:wanted });
+      highlightSolution();
+      await sleep(850);
+      nextQuestion();
+    }
+  }
+
+  function markWrong(el){ el.classList.add('wrong'); }
+  function markCorrect(el){ el.classList.add('correct'); }
+
+  function enqueueWrong(item){
+    const i = state.wrongQueue.findIndex(x=>x.type===item.type && norm(x.name)===norm(item.name));
+    if(i>-1) state.wrongQueue[i].cooldown = 2; else state.wrongQueue.push({ ...item, cooldown:2 });
+  }
+
+  function lockProvinceOnMap(provName){
+    const nodes = Array.from(state.svgRoot.querySelectorAll('path,polygon,g'));
+    nodes.forEach(n=>{
+      const nm = canon(getElementName(n)||''); if(!nm) return;
+      if(norm(nm)===norm(provName)) n.classList.add('locked');
+    });
+  }
+
+  function lockCommunityOnMap(commName){
+    const nodes = Array.from(state.svgRoot.querySelectorAll('path,polygon,g'));
+    nodes.forEach(n=>{
+      const nm = canon(getElementName(n)||''); if(!nm) return;
+      if(COMMUNITIES.includes(nm) && norm(nm)===norm(commName)) n.classList.add('locked');
+      const comm = P2C[nm];
+      if(comm && norm(comm)===norm(commName)) n.classList.add('locked');
+    });
+  }
+
+  function markProvinceSolved(name){
+    lockProvinceOnMap(name);
+    state.remainingProvinces = state.remainingProvinces.filter(p=>norm(p)!==norm(name));
+  }
+
+  function markCommunitySolved(name){
+    lockCommunityOnMap(name);
+    state.remainingCommunities = state.remainingCommunities.filter(c=>norm(c)!==norm(name));
+  }
+
+  function highlightSolution(){
+    const svg = state.svgRoot; if(!svg) return;
+    const t = state.target;
+    const nodes = Array.from(svg.querySelectorAll('path,polygon,g'));
+    nodes.forEach(n=>{
+      const nm = canon(getElementName(n)||''); if(!nm) return;
+      if(t.type==='province' && norm(nm)===norm(t.name)) n.classList.add('target');
+      if(t.type==='community'){
+        if(COMMUNITIES.includes(nm) && norm(nm)===norm(t.name)) n.classList.add('target');
+        const comm = P2C[nm];
+        if(comm && norm(comm)===norm(t.name)) n.classList.add('target');
+      }
+    });
+  }
+
+  function endGame(){
+    setQuestion('¡Has completado todas las preguntas de este nivel!');
+    els.result.hidden = false;
+    const doneC = COMMUNITIES.length - state.remainingCommunities.length;
+    const doneP = PROVINCES.length - state.remainingProvinces.length;
+    const txt = state.level===1
+      ? `${doneC}/${COMMUNITIES.length} comunidades`
+      : `${doneP}/${PROVINCES.length} provincias`;
+    els.summary.textContent = `Aciertos: ${state.hits} · Fallos: ${state.miss} · Completado: ${txt}`;
+  }
+
+  // ===============================================
+  // UI
+  // ===============================================
+  document.querySelectorAll('.lvl').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      document.querySelectorAll('.lvl').forEach(b=>b.classList.remove('primary'));
+      btn.classList.add('primary');
+      const lvl = parseInt(btn.dataset.level,10);
+      await startLevel(lvl);
+    })
+  });
+
+  document.getElementById('again').addEventListener('click',()=>{ startLevel(state.level||1); });
+  document.getElementById('btn-reset').addEventListener('click',()=>{
+    resetStats();
+    if(state.svgRoot){ state.svgRoot.querySelectorAll('.wrong,.target,.correct,.locked').forEach(n=>n.classList.remove('wrong','target','correct','locked')); }
+    state.remainingCommunities = COMMUNITIES.slice();
+    state.remainingProvinces = PROVINCES.slice();
+    state.wrongQueue = [];
+    els.result.hidden = true;
+    setQuestion('Reiniciado. Elige un nivel para empezar.');
+  });
+
+  document.getElementById('btn-how').addEventListener('click', (e)=>{
+    e.preventDefault();
+    alert('Requisitos:\n\n• Guarda el archivo como index.html y coloca la carpeta /maps con comunidades.svg y provincias.svg al lado.\n• Ábrelo desde un servidor local (http://). Ejemplos: VS Code “Live Server”, o `python -m http.server`.\n\nCómo jugar:\n1) Elige un nivel.\n2) Cada acierto queda marcado y no se repite.\n3) Los fallos se repreguntan tras un par de preguntas.\n4) Completa todas las preguntas del nivel.');
+  });
+
+  </script>
+</body>
+</html>
